@@ -1,0 +1,65 @@
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:8000";
+
+
+async function request(endpoint, options = {}) {
+  const response = await fetch(
+    `${API_URL}${endpoint}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      ...options,
+    }
+  );
+
+  if (!response.ok) {
+    let message = "Something went wrong.";
+
+    try {
+      const error = await response.json();
+      message = error.detail || message;
+    } catch {
+      // Ignore invalid JSON error bodies.
+    }
+
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+
+export function getEmails() {
+  return request("/api/emails");
+}
+
+
+export function getEmailAnalysis(emailId) {
+  return request(
+    `/api/emails/${emailId}/analysis`
+  );
+}
+
+
+export function getDashboard() {
+  return request("/api/dashboard");
+}
+
+
+export function getActionPlan() {
+  return request("/api/action-plan");
+}
+
+
+export function generateReply(emailId, tone) {
+  return request("/api/reply", {
+    method: "POST",
+
+    body: JSON.stringify({
+      email_id: emailId,
+      tone,
+    }),
+  });
+}
